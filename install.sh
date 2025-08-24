@@ -8,8 +8,9 @@ password=$1
 echo $password | sudo -S apt-get update
 echo $password | sudo -S apt install -y python3-pip python3-venv python3-pil python3-smbus
 
-# create virtual environment for pidisplay
-python3 -m venv /opt/pidisplay-venv
+# remove existing virtual environment and create new one
+echo $password | sudo -S rm -rf /opt/pidisplay-venv
+echo $password | sudo -S python3 -m venv /opt/pidisplay-venv
 echo $password | sudo -S chown -R $USER:$USER /opt/pidisplay-venv
 
 # activate venv and install pidisplay
