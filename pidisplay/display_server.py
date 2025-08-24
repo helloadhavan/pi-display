@@ -53,9 +53,14 @@ class DisplayServer(object):
             print("Warning: No SSD1306 display found at common addresses (0x3c, 0x3d)")
             print("Running without display - web interface will still work")
         self.font = ImageFont.load_default()
-        self.image = Image.new('1', (self.display.width, self.display.height))
-        self.draw = ImageDraw.Draw(self.image)
-        self.draw.rectangle((0, 0, self.image.width, self.image.height), outline=0, fill=0)
+        if self.display:
+            self.image = Image.new('1', (self.display.width, self.display.height))
+            self.draw = ImageDraw.Draw(self.image)
+            self.draw.rectangle((0, 0, self.image.width, self.image.height), outline=0, fill=0)
+        else:
+            # Create dummy image for compatibility when no display
+            self.image = Image.new('1', (128, 32))
+            self.draw = ImageDraw.Draw(self.image)
         self.stats_enabled = False
         self.stats_thread = None
         self.stats_interval = 1.0
