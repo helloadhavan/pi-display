@@ -16,8 +16,10 @@ def ip_address(interface):
     try:
         if network_interface_state(interface) == 'down':
             return None
-        cmd = "ifconfig %s | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1'" % interface
-        return subprocess.check_output(cmd, shell=True).decode('ascii')[:-1]
+        # Use modern 'ip' command instead of deprecated 'ifconfig'
+        cmd = "ip addr show %s | grep 'inet ' | grep -v '127.0.0.1' | awk '{print $2}' | cut -d'/' -f1" % interface
+        result = subprocess.check_output(cmd, shell=True).decode('ascii').strip()
+        return result if result else None
     except:
         return None
 
