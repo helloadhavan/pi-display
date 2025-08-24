@@ -13,6 +13,9 @@ echo $password | sudo -S rm -rf /opt/pidisplay-venv
 echo $password | sudo -S python3 -m venv /opt/pidisplay-venv
 echo $password | sudo -S chown -R $USER:$USER /opt/pidisplay-venv
 
+# clean up any existing build artifacts
+echo $password | sudo -S rm -rf build/ dist/ *.egg-info/
+
 # activate venv and install pidisplay
 /opt/pidisplay-venv/bin/pip install --upgrade pip setuptools wheel
 /opt/pidisplay-venv/bin/pip install .
