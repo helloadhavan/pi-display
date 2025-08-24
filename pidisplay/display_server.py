@@ -13,19 +13,19 @@ import os
 class DisplayServer(object):
     
     def __init__(self, *args, **kwargs):
-        adress = os.popen("i2cdetect -y -r 1 0x48 0x48 | egrep '48' | awk '{print $2}'").read()
+        adress = os.popen("/usr/sbin/i2cdetect -y -r 1 0x48 0x48 | egrep '48' | awk '{print $2}'").read()
         if(adress=='48\n'):
             self.ads = ads1115.ADS1115()
         else:
             self.ads = None
             
-        adress = os.popen("i2cdetect -y -r 1 0x41 0x41 | egrep '41' | awk '{print $2}'").read()
+        adress = os.popen("/usr/sbin/i2cdetect -y -r 1 0x41 0x41 | egrep '41' | awk '{print $2}'").read()
         if(adress=='41\n'):
             self.ina219 = ina219.INA219(addr=0x41)
         else:
             self.ina219 = None
 
-        adress = os.popen("i2cdetect -y -r 1 0x42 0x42 | egrep '42' | awk '{print $2}'").read()
+        adress = os.popen("/usr/sbin/i2cdetect -y -r 1 0x42 0x42 | egrep '42' | awk '{print $2}'").read()
         if(adress=='42\n'):
             self.ina = ina219.INA219(addr=0x42)
         else:
@@ -33,9 +33,25 @@ class DisplayServer(object):
             
         # Initialize I2C and display
         i2c = busio.I2C(board.SCL, board.SDA)
-        self.display = adafruit_ssd1306.SSD1306_I2C(128, 32, i2c)
-        self.display.fill(0)
-        self.display.show()
+        
+        # Try common SSD1306 addresses
+        display_addresses = [0x3c, 0x3d]
+        self.display = None
+        
+        for addr in display_addresses:
+            try:
+                self.display = adafruit_ssd1306.SSD1306_I2C(128, 32, i2c, addr=addr)
+                self.display.fill(0)
+                self.display.show()
+                print(f"Display found at address 0x{addr:02x}")
+                break
+            except Exception as e:
+                print(f"No display at address 0x{addr:02x}: {e}")
+                continue
+        
+        if self.display is None:
+            print("Warning: No SSD1306 display found at common addresses (0x3c, 0x3d)")
+            print("Running without display - web interface will still work")
         self.font = ImageFont.load_default()
         self.image = Image.new('1', (self.display.width, self.display.height))
         self.draw = ImageDraw.Draw(self.image)
@@ -124,8 +140,13 @@ class DisplayServer(object):
             for i, entry in enumerate(entries):
                 self.draw.text((i * offset + 4, top), entry, font=self.font, fill=255)
 
-            self.display.image(self.image)
-            self.display.show()
+            if self.display:
+                self.display.image(self.image)
+                self.display.show()
+            else:
+                # Print stats to console when display is not available
+                print(f"Stats: IP={ip_address('eth0') or ip_address('wlan0') or 'N/A'}, "
+                      f"CPU={cpu_percent}, RAM={ram_percent}, DISK={disk_percent}, TEMP={temp_percent}")
 
             time.sleep(self.stats_interval)
             
@@ -140,22 +161,26 @@ class DisplayServer(object):
         self.stats_enabled = False
         if self.stats_thread is not None:
             self.stats_thread.join()
-        self.draw.rectangle((0, 0, self.image.width, self.image.height), outline=0, fill=0)
-        self.display.image(self.image)
-        self.display.show()
+        if self.display:
+            self.draw.rectangle((0, 0, self.image.width, self.image.height), outline=0, fill=0)
+            self.display.image(self.image)
+            self.display.show()
 
     def set_text(self, text):
         self.disable_stats()
-        self.draw.rectangle((0, 0, self.image.width, self.image.height), outline=0, fill=0)
-        
-        lines = text.split('\n')
-        top = 2
-        for line in lines:
-            self.draw.text((4, top), line, font=self.font, fill=255)
-            top += 10
-        
-        self.display.image(self.image)
-        self.display.show()
+        if self.display:
+            self.draw.rectangle((0, 0, self.image.width, self.image.height), outline=0, fill=0)
+            
+            lines = text.split('\n')
+            top = 2
+            for line in lines:
+                self.draw.text((4, top), line, font=self.font, fill=255)
+                top += 10
+            
+            self.display.image(self.image)
+            self.display.show()
+        else:
+            print(f"Display text: {text}")
         
 
 server = DisplayServer()

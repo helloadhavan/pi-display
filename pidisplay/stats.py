@@ -31,13 +31,13 @@ from pidisplay import ina219
 import os
 import subprocess
 
-adress = os.popen("i2cdetect -y -r 1 0x48 0x48 | egrep '48' | awk '{print $2}'").read()
+adress = os.popen("/usr/sbin/i2cdetect -y -r 1 0x48 0x48 | egrep '48' | awk '{print $2}'").read()
 if(adress=='48\n'):
     ads = ads1115.ADS1115()
 else:
     ads = None
 
-adress = os.popen("i2cdetect -y -r 1 0x41 0x41 | egrep '41' | awk '{print $2}'").read()
+adress = os.popen("/usr/sbin/i2cdetect -y -r 1 0x41 0x41 | egrep '41' | awk '{print $2}'").read()
 if(adress=='41\n'):
     ina = ina219.INA219(addr=0x41)
 else:
