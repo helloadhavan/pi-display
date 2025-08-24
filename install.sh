@@ -20,8 +20,12 @@ echo $password | sudo -S rm -rf build/ dist/ *.egg-info/
 /opt/pidisplay-venv/bin/pip install --upgrade pip setuptools wheel
 /opt/pidisplay-venv/bin/pip install .
 
+# enable I2C interface
+echo $password | sudo -S raspi-config nonint do_i2c 0
+
 # install picard display service
 echo $password | sudo -S sed -i -e 's:#dtparam=i2c_arm=on:dtparam=i2c_arm=on:g'  /boot/config.txt || true
+echo $password | sudo -S sed -i -e 's:#dtparam=i2c1=on:dtparam=i2c1=on:g'  /boot/config.txt || true
 /opt/pidisplay-venv/bin/python -m pidisplay.create_display_service
 echo $password | sudo -S mv picard_display.service /etc/systemd/system/picard_display.service
 echo $password | sudo -S systemctl enable picard_display
