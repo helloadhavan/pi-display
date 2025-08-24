@@ -1,5 +1,4 @@
 import subprocess
-import pkg_resources
 import platform
 import os
 

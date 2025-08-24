@@ -1,4 +1,4 @@
-import smbus
+import smbus2 as smbus
 import time
 
 # I2C address of the device
