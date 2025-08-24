@@ -9,7 +9,7 @@ Description=JetCard display service
 [Service]
 Type=simple
 User=%s
-ExecStart=/bin/sh -c "python3 -m pidisplay.display_server"
+ExecStart=/opt/pidisplay-venv/bin/python -m pidisplay.display_server
 WorkingDirectory=%s
 Restart=always
 

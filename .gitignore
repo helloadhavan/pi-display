@@ -186,3 +186,6 @@ $RECYCLE.BIN/
 
 # Project specific
 # Add any project-specific files or directories to ignore here
+
+# Virtual environment location
+/opt/pidisplay-venv/
