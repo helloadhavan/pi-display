@@ -6,6 +6,8 @@ setup(
     description='a display status server for Raspberry Pi',
     packages=find_packages(),
     install_requires=[
-        'Adafruit_SSD1306'
+        'adafruit-circuitpython-ssd1306',
+        'adafruit-circuitpython-busdevice',
+        'flask'
     ],
 )

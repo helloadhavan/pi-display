@@ -1,9 +1,9 @@
 import threading
-import Adafruit_SSD1306
 import time
-import PIL.Image
-import PIL.ImageFont
-import PIL.ImageDraw
+import board
+import busio
+import adafruit_ssd1306
+from PIL import Image, ImageFont, ImageDraw
 from flask import Flask
 from .utils import ip_address, cpu_usage, memory_usage, disk_usage, temp
 from pidisplay import ads1115
@@ -31,13 +31,14 @@ class DisplayServer(object):
         else:
             self.ina = None
             
-        self.display = Adafruit_SSD1306.SSD1306_128_32(rst=None, i2c_bus=1, gpio=1) 
-        self.display.begin()
-        self.display.clear()
-        self.display.display()
-        self.font = PIL.ImageFont.load_default()
-        self.image = PIL.Image.new('1', (self.display.width, self.display.height))
-        self.draw = PIL.ImageDraw.Draw(self.image)
+        # Initialize I2C and display
+        i2c = busio.I2C(board.SCL, board.SDA)
+        self.display = adafruit_ssd1306.SSD1306_I2C(128, 32, i2c)
+        self.display.fill(0)
+        self.display.show()
+        self.font = ImageFont.load_default()
+        self.image = Image.new('1', (self.display.width, self.display.height))
+        self.draw = ImageDraw.Draw(self.image)
         self.draw.rectangle((0, 0, self.image.width, self.image.height), outline=0, fill=0)
         self.stats_enabled = False
         self.stats_thread = None
@@ -124,7 +125,7 @@ class DisplayServer(object):
                 self.draw.text((i * offset + 4, top), entry, font=self.font, fill=255)
 
             self.display.image(self.image)
-            self.display.display()
+            self.display.show()
 
             time.sleep(self.stats_interval)
             
@@ -141,7 +142,7 @@ class DisplayServer(object):
             self.stats_thread.join()
         self.draw.rectangle((0, 0, self.image.width, self.image.height), outline=0, fill=0)
         self.display.image(self.image)
-        self.display.display()
+        self.display.show()
 
     def set_text(self, text):
         self.disable_stats()
@@ -154,7 +155,7 @@ class DisplayServer(object):
             top += 10
         
         self.display.image(self.image)
-        self.display.display()
+        self.display.show()
         
 
 server = DisplayServer()
