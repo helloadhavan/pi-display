@@ -19,9 +19,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 import time
-
-import Adafruit_SSD1306
-
+import board
+import busio
+import adafruit_ssd1306
 from PIL import Image
 from PIL import ImageDraw
 from PIL import ImageFont
@@ -43,15 +43,11 @@ if(adress=='41\n'):
 else:
     ina = None
 
-# 128x32 display with hardware I2C:
-disp = Adafruit_SSD1306.SSD1306_128_32(rst=None, i2c_bus=1, gpio=1) # setting gpio to 1 is hack to avoid platform detection
-
-# Initialize library.
-disp.begin()
-
-# Clear display.
-disp.clear()
-disp.display()
+# Initialize I2C and display
+i2c = busio.I2C(board.SCL, board.SDA)
+disp = adafruit_ssd1306.SSD1306_I2C(128, 32, i2c)
+disp.fill(0)
+disp.show()
 
 # Create blank image for drawing.
 # Make sure to create image with mode '1' for 1-bit color.
@@ -131,5 +127,5 @@ while True:
 
     # Display image.
     disp.image(image)
-    disp.display()
+    disp.show()
     time.sleep(1)

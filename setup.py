@@ -8,7 +8,10 @@ setup(
     install_requires=[
         'adafruit-circuitpython-ssd1306',
         'adafruit-circuitpython-busdevice',
-        'flask'
+        'flask',
+        'RPi.GPIO',
+        'Pillow',  # PIL (Python Imaging Library)
+        'smbus2'   # For I2C communication (smbus)
     ],
     python_requires='>=3.7',
     classifiers=[
